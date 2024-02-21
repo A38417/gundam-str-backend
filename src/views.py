@@ -12,7 +12,7 @@ from rest_framework.exceptions import ValidationError
 from django.contrib.auth.models import User
 from django.contrib.auth.password_validation import validate_password
 
-from src.serializers import UserSerializer, ChangePasswordSerializer, UserRegisterSerializer
+from src.serializers import UserSerializer, ChangePasswordSerializer
 from django_filters import rest_framework as filters
 
 

@@ -14,11 +14,8 @@ class IsSuperUserOrReadOnly(BasePermission):
         if request.user.is_superuser:
             return True
 
-        if request.method in ['POST']:
-            return True
-
-        if request.user == 'GET' or request.user == 'PUT' or request.method == 'PATCH':
-            return request.user == view.get_object().user
+        if request.method in ['POST'] or request.method == 'GET' or request.method == 'PUT' or request.method == 'PATCH':
+            return request.user and request.user.is_authenticated
 
         return False
 
