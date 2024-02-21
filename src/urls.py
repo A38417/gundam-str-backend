@@ -29,6 +29,7 @@ urlpatterns = [
                   path('', include('image_upload.urls')),
                   path('', include('products.urls')),
                   path('', include('carts.urls')),
+                  path('', include('order.urls')),
                   path('api/login/', views.login_view, name='login'),
                   path('api/logout/', views.logout_view, name='logout'),
                   path('api/register/', views.register_view, name='register'),

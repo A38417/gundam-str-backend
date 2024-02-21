@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'event_manager',
     'products',
     'carts',
+    'order',
 
 
     'rest_framework_simplejwt.token_blacklist',
@@ -121,7 +122,6 @@ DATABASES = {
         'POST': '5432'
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators

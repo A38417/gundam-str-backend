@@ -1,3 +1,4 @@
+from django.db import transaction
 from django.shortcuts import redirect
 from rest_framework import viewsets, status
 from rest_framework.pagination import PageNumberPagination
@@ -14,10 +15,7 @@ class IsSuperUserOrReadOnly(BasePermission):
         if request.user.is_superuser:
             return True
 
-        if request.method in ['POST'] or request.method == 'GET' or request.method == 'PUT' or request.method == 'PATCH':
-            return request.user and request.user.is_authenticated
-
-        return False
+        return request.user and request.user.is_authenticated
 
 
 class BasePagination(PageNumberPagination):
@@ -73,6 +71,18 @@ class CartViewSet(viewsets.ModelViewSet):
     pagination_class = BasePagination
     queryset = Cart.objects.all()
     serializer_class = CartSerializer
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+
+        with transaction.atomic():
+            products = instance.items.all()
+            for product in products:
+                product.delete()
+
+            self.perform_destroy(instance)
+
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class CartItemViewSet(viewsets.ModelViewSet):
