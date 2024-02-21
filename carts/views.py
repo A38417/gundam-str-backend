@@ -1,3 +1,4 @@
+from django.shortcuts import redirect
 from rest_framework import viewsets, status
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import BasePermission, SAFE_METHODS, IsAuthenticated
@@ -5,6 +6,7 @@ from rest_framework.response import Response
 
 from carts.models import Cart, CartItem
 from carts.serializers import CartSerializer, CartItemSerializer, CartItemWriteSerializer
+from products.models import Product
 
 
 class IsSuperUserOrReadOnly(BasePermission):
@@ -91,9 +93,30 @@ class CartItemViewSet(viewsets.ModelViewSet):
     def create(self, request, *args, **kwargs):
         user = request.user
         cart = Cart.objects.filter(user=user)
+        product = Product.objects.get(id=request.data['product'])
+
+        if request.data['quantity'] > product.quantity:
+            return Response("Quantity in stock is not enough", status=status.HTTP_400_BAD_REQUEST)
 
         if cart.exists():
             request.data['cart'] = cart.get().id
+            cart_item = CartItem.objects.filter(cart=cart.get(), product_id=request.data['product'])
+
+            if cart_item.exists():
+                request.data['quantity'] += cart_item.get().quantity
+
+                if request.data['quantity'] > product.quantity:
+                    return Response("Quantity in stock is not enough", status=status.HTTP_400_BAD_REQUEST)
+
+                serializer = self.get_serializer(cart_item.get(), data=request.data, partial=True)
+                serializer.is_valid(raise_exception=True)
+                serializer.save()
+                if getattr(cart_item.get(), '_prefetched_objects_cache', None):
+                    # If 'prefetch_related' has been applied to a queryset, we need to
+                    # forcibly invalidate the prefetch cache on the instance.
+                    cart_item.get()._prefetched_objects_cache = {}
+                return Response(serializer.data)
+
             return super().create(request, *args, **kwargs)
 
         new_cart = CartSerializer(data={
@@ -104,4 +127,4 @@ class CartItemViewSet(viewsets.ModelViewSet):
             request.data['cart'] = new_cart.instance.id
             return super().create(request, *args, **kwargs)
 
-        return Response("Error", status=status.HTTP_400_BAD_REQUEST)
+        return Response("User not found", status=status.HTTP_400_BAD_REQUEST)
