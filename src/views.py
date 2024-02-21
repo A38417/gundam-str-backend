@@ -12,7 +12,7 @@ from rest_framework.exceptions import ValidationError
 from django.contrib.auth.models import User
 from django.contrib.auth.password_validation import validate_password
 
-from src.serializers import UserSerializer, ChangePasswordSerializer
+from src.serializers import UserSerializer, ChangePasswordSerializer, UserRegisterSerializer
 from django_filters import rest_framework as filters
 
 
@@ -31,7 +31,7 @@ def login_view(request):
                 'refresh': str(refresh),
                 'access': str(refresh.access_token),
                 'access_exp': refresh.access_token.payload['exp'],
-                # 'user': user
+                'user': UserSerializer(user).data
             }
         )
     else:
@@ -48,6 +48,15 @@ def logout_view(request):
         return Response({'message': 'Logged out successfully'})
     except Exception as e:
         return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['POST'])
+def register_view(request):
+    serializer = UserSerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class IsSuperUserOrReadOnly(BasePermission):

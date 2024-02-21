@@ -31,6 +31,7 @@ urlpatterns = [
                   path('', include('carts.urls')),
                   path('api/login/', views.login_view, name='login'),
                   path('api/logout/', views.logout_view, name='logout'),
+                  path('api/register/', views.register_view, name='register'),
                   path('api/', include(router.urls)),
                   path('api/user/change-password/<int:pk>/', views.UserViewSet.as_view({'post': 'change_password'}),
                        name='user-change-password'),
