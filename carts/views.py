@@ -82,6 +82,8 @@ class CartItemViewSet(viewsets.ModelViewSet):
     serializer_class_by_actions = {
         "GET": CartItemSerializer,
         "POST": CartItemWriteSerializer,
+        "PATCH": CartItemSerializer,
+        "DELETE": CartItemSerializer,
     }
 
     def get_serializer_class(self):
@@ -125,3 +127,22 @@ class CartItemViewSet(viewsets.ModelViewSet):
             return super().create(request, *args, **kwargs)
 
         return Response("User not found", status=status.HTTP_400_BAD_REQUEST)
+
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        quantity = request.data.get('quantity', 0)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+
+        if quantity > instance.product.quantity:
+            return Response("Quantity in stock is not enough", status=status.HTTP_400_BAD_REQUEST)
+
+        self.perform_update(serializer)
+
+        if getattr(instance, '_prefetched_objects_cache', None):
+            # If 'prefetch_related' has been applied to a queryset, we need to
+            # forcibly invalidate the prefetch cache on the instance.
+            instance._prefetched_objects_cache = {}
+
+        return Response(serializer.data)
