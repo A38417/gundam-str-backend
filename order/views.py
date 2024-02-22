@@ -3,6 +3,8 @@ from rest_framework import viewsets, status
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import BasePermission
 from rest_framework.response import Response
+from rest_framework.filters import SearchFilter, OrderingFilter
+from django_filters import rest_framework as filters
 
 from .models import Order
 from .serializers import OrderSerializer, CreateOrderSerializer
@@ -24,7 +26,11 @@ class BasePagination(PageNumberPagination):
 class OrderViewSet(viewsets.ModelViewSet):
     permission_classes = [IsSuperUserOrReadOnly]
     pagination_class = BasePagination
+    filter_backends = [SearchFilter, OrderingFilter, filters.DjangoFilterBackend]
     queryset = Order.objects.all()
+    filterset_fields = ['user']
+    search_fields = '__all__'
+    ordering_fields = '__all__'
 
     def get_serializer_class(self):
         if self.request.method == 'GET':

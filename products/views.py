@@ -1,4 +1,6 @@
 from rest_framework import viewsets
+from rest_framework.filters import SearchFilter, OrderingFilter
+from django_filters import rest_framework as filters
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import BasePermission, SAFE_METHODS, IsAuthenticated
 
@@ -27,9 +29,10 @@ class BasePagination(PageNumberPagination):
 
 class ProductViewSet(viewsets.ModelViewSet):
     permission_classes = [IsSuperUserOrReadOnly]
-    queryset = Product.objects.all().order_by('-id')
+    queryset = Product.objects.all()
     serializer_class = ProductSerializer
     pagination_class = BasePagination
+    filter_backends = [SearchFilter, OrderingFilter, filters.DjangoFilterBackend]
     search_fields = ['name', 'price', 'type']
     ordering_fields = '__all__'
 
