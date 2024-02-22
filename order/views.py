@@ -29,13 +29,21 @@ class OrderViewSet(viewsets.ModelViewSet):
     filter_backends = [SearchFilter, OrderingFilter, filters.DjangoFilterBackend]
     queryset = Order.objects.all()
     filterset_fields = ['user']
-    search_fields = '__all__'
-    ordering_fields = '__all__'
+    search_fields = ['name', 'phone', 'address', 'total_amount']
+    ordering_fields = ['name', 'phone', 'address', 'total_amount', 'created_at']
 
     def get_serializer_class(self):
         if self.request.method == 'GET':
             return OrderSerializer
         return CreateOrderSerializer
+
+    def list(self, request, *args, **kwargs):
+        if 'query_all' in request.query_params:
+            queryset = self.filter_queryset(self.get_queryset())
+            serializer = self.get_serializer(queryset, many=True)
+            return Response(serializer.data)
+        else:
+            return super().list(request, *args, **kwargs)
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()

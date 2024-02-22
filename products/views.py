@@ -3,6 +3,7 @@ from rest_framework.filters import SearchFilter, OrderingFilter
 from django_filters import rest_framework as filters
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import BasePermission, SAFE_METHODS, IsAuthenticated
+from rest_framework.response import Response
 
 from products.models import Product
 from products.seriallizers import ProductSerializer
@@ -36,5 +37,10 @@ class ProductViewSet(viewsets.ModelViewSet):
     search_fields = ['name', 'price', 'type']
     ordering_fields = '__all__'
 
-
-
+    def list(self, request, *args, **kwargs):
+        if 'query_all' in request.query_params:
+            queryset = self.filter_queryset(self.get_queryset())
+            serializer = self.get_serializer(queryset, many=True)
+            return Response(serializer.data)
+        else:
+            return super().list(request, *args, **kwargs)
