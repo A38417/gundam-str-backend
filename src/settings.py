@@ -48,7 +48,6 @@ INSTALLED_APPS = [
     'corsheaders',
 
     'image_upload',
-    'event_manager',
     'products',
     'carts',
     'order',

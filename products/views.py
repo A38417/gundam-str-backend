@@ -34,6 +34,7 @@ class ProductViewSet(viewsets.ModelViewSet):
     serializer_class = ProductSerializer
     pagination_class = BasePagination
     filter_backends = [SearchFilter, OrderingFilter, filters.DjangoFilterBackend]
+    filterset_fields = ['type']
     search_fields = ['name', 'price', 'type']
     ordering_fields = '__all__'
 

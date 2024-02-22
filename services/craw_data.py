@@ -7,8 +7,9 @@ from urllib.parse import urlparse
 import re
 import datetime
 
+base_url = 'https://herogame.vn/danh-muc/mo-hinh-one-piece'
 root_url = 'https://herogame.vn'
-response = requests.get(root_url).text
+response = requests.get(base_url).text
 tree = html.fromstring(response)
 links = tree.xpath('//a/@href')
 
@@ -33,12 +34,12 @@ for link in new_links:
             price = re.findall(r"[0-9]", price)
             price = int(''.join(price))
         except Exception:
-            price = 0
+            price = 100000
 
         description = root.xpath("//div[@class='title']/h2//text()[normalize-space()]")[0]
         type = root.xpath("//div[@class='intro']//a/strong/text()")[0]
 
-        with open("data.json", "r+", encoding='UTF-8') as jsonFile:
+        with open("data3.json", "r+", encoding='UTF-8') as jsonFile:
             data = json.load(jsonFile)
 
         data.append({
@@ -50,7 +51,7 @@ for link in new_links:
             'type': type
         })
 
-        with open('data.json', 'w', encoding='UTF-8') as f:
+        with open('data3.json', 'w', encoding='UTF-8') as f:
             json.dump(data, f, indent=4, separators=(',', ': '), ensure_ascii=False)
 
     except Exception as e:

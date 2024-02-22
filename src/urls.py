@@ -25,7 +25,6 @@ router.register(r'user', views.UserViewSet)
 
 urlpatterns = [
                   path('admin/', admin.site.urls),
-                  path('', include('event_manager.urls')),
                   path('', include('image_upload.urls')),
                   path('', include('products.urls')),
                   path('', include('carts.urls')),
